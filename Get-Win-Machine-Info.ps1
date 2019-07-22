@@ -1,7 +1,11 @@
-#Get all the information of local machine, with programs installed and version. Results are printed and saved into a file on c:\temp\
-#DXC Migration Testing - GEt Info helper
-#Tested on Windows 10 and Windows 7 64
-#Created by Ruben D Lopez on 10/07/2019
+<#Get all the information of local machine, with programs installed and version. Results are printed and saved into a file on c:\temp\
+Tested on Windows 10 and Windows 7 64
+Created by Ruben D Lopez on 10/07/2019
+
+Known Issues :  It will not display exe programs that were not installed. A simple .exe that is somewhere on the disk, will
+not be listed as a Program.
+#>
+
 $obj = Get-WMIObject Win32_BIOS;
 $concatInformationForFile = "`r`n`r`n********************** MACHINE INFORMATION **************************";
 $concatInformationForFile += "`r`n" + $env:computername;
