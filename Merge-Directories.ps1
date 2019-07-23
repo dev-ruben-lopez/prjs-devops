@@ -10,6 +10,7 @@
     Script to merge files from one folder SOURCE to another DESTINATION.
     Use paramenters to specify if want to compare by name only, or also by content.
     If using default, it will only search and compare using names and extensions. 
+    A log file is created on the destination root path after completion.
 TODO
   - As a user, I want to have an option to merge by date, so I can keep the most recent file on the destination directory.
   - As a user, I want to have an option to create a file with a log, so I can check what was copied and what not.
@@ -37,6 +38,9 @@ Param(
 [bool]$compareContents
 )  
 
+
+$concatInformationForFile = "`n`r********************** MERGING FILES REPORT **************************`n `r";
+
 "`n`r Begin Merging files: `n`r";
   
 $files = Get-ChildItem -Path $sourcePath -Recurse -Filter "*.*"  
@@ -54,6 +58,7 @@ foreach($file in $files)
         if (!(Test-Path($dir))) { New-Item -ItemType directory -Path $dir }  
         "`n Copying file : $sourcePathFile `r"
         Copy-Item -Path $sourcePathFile -Destination $destinationPathFile -Recurse -Force  
+        $concatInformationForFile += " `n `r File copied : $sourcePathFile `n `r"
         
     }  
     else
@@ -68,6 +73,7 @@ foreach($file in $files)
                 if(  $null -eq (Get-Content $sourcePathFile) -or $null -eq (Get-Content $destinationPathFile))
                 {
                     "`n File : $sourcePathFile or $destinationPathFile is/are empty. No merge. `r"
+                    $concatInformationForFile += "`n`r File : $sourcePathFile or $destinationPathFile is/are empty. No merge. `n`r"
                 }
                 else 
                 {
@@ -77,15 +83,22 @@ foreach($file in $files)
                         $dir = Split-Path -parent $destinationPathFile  
                         if (!(Test-Path($dir))) { New-Item -ItemType directory -Path $dir }  
             
-                        "`n Copying file : $sourcePathFile `r"    
+                        "`n`r Replacing file : $sourcePathFile `n`r"    
                         Copy-Item -Path $sourcePathFile -Destination $destinationPathFile -Recurse -Force  
+                        $concatInformationForFile += "`n`r File replaced : $sourcePathFile `n`r"
                     }  
                 }
     
             }  
         }
+        else {
+            $concatInformationForFile += "`n`r File $sourcePathFile already exists. `n`r"
+        }
 
     }  
 }
 
-"`n`r Process completed. `n`r";  
+"`n`r Process completed. `n`r"
+$concatInformationForFile += "`n`r **************** Process Completed ****************** `n`r"
+$stringDateTime = Get-Date -Format "-dd-MM-yyyy-HHmm"
+$concatInformationForFile > "$destinationPath\merge-Information$stringDateTime.txt"
